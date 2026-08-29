@@ -1,0 +1,7 @@
+dist/
+node_modules/
+.*.swp
+*.exe
+*.exe~
+webtimer
+webtimer_*

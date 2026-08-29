@@ -1,0 +1,537 @@
+@use "sass:color";
+
+@import url("normalize.css/normalize.css");
+
+$body-bg-color: hsl(0deg, 0%, 18%);
+$body-fg-color: hsl(0deg, 0%, 50%);
+
+$controls-button-fill-color: hsl(0deg, 0%, 55%);
+$controls-button-text-color: hsl(0deg, 0%, 0%);
+$controls-button-fill-hover-color: hsl(0deg, 0%, 85%);
+
+$controls-button-secondary-fill-color: hsl(0deg, 0%, 40%);
+$controls-button-secondary-fill-hover-color: hsl(0deg, 0%, 70%);
+
+$timer-display-bg-color: hsl(0deg, 0%, 0%);
+
+$timer-card-bg-color: hsl(0deg, 0%, 0%);
+$timer-card-fg-color: hsl(0deg, 100%, 50%);
+$timer-card-warning-bg-color: hsl(45deg, 100%, 51%);
+$timer-card-warning-fg-color: hsl(0deg, 0%, 0%);
+$timer-card-timeout-bg-color: hsl(354deg 86% 32%);
+$timer-card-timeout-fg-color: hsl(0deg, 0%, 100%);
+
+$timer-menu-bg-color: hsl(0deg, 0%, 9%);
+$timer-menu-button-fill-color: hsl(0deg, 0%, 18%);
+$timer-menu-button-text-color: hsl(0deg, 0%, 40%);
+$timer-menu-button-hover-fill-color: hsl(0deg, 0%, 50%);
+$timer-menu-button-hover-text-color: hsl(0deg, 0%, 0%);
+$timer-menu-button-status-color: hsl(0deg, 0%, 30%);
+
+$timer-display-connecting-bg-color: hsl(188deg 77% 40%);
+$timer-display-connecting-fg-color: hsl(0deg, 0%, 0%);
+
+$qr-bg-color: hsl(0deg, 0%, 100%);
+$qr-fg-color: hsl(0deg, 0%, 0%);
+
+$splash-input-text-bg-color: hsl(0deg, 0%, 80%);
+
+$layout-breakpoint-width-500px: 500px;
+$layout-breakpoint-width-700px: 700px;
+$layout-breakpoint-width-800px: 800px;
+$layout-breakpoint-height-580px: 580px;
+
+/* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap'); */
+/* latin */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(inter.woff2) format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-size: 18px;
+  background: $body-bg-color;
+  color: $body-fg-color;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  width: 100vw;
+  height: 100vh;
+  width: 100dvw;
+  height: 100dvh;
+  touch-action: manipulation;
+}
+
+/******************************
+ * Show/hide panels based on state.
+ */
+.show-splash .timer-display,
+.show-splash .controls-display {
+  display: none;
+}
+
+.show-timer .splash-display {
+  display: none;
+}
+
+/******************************
+ * Main timer display.
+ */
+
+.timer-display {
+  height: 100%;
+  margin: 5vw 5vw 0 5vw;
+  background: $timer-display-bg-color;
+  cursor: pointer;
+  position: relative;
+
+  @media screen and (orientation: landscape) {
+    margin: 5vh 5vh 0 5vh;
+  }
+
+  .card {
+    position: relative;
+    background: $timer-card-bg-color;
+    opacity: 1;
+    transition: opacity 1s;
+    width: 100%;
+    height: 100%;
+    /* height of .timer-display .menu */
+    padding-bottom: 55px;
+    box-sizing: border-box;
+    transition:
+      opacity 0.5s,
+      background-color 0.5s ease-in-out,
+      color 0.5s ease-in-out;
+
+    @media (max-height: $layout-breakpoint-height-580px) {
+      /* bottom menu is hidden */
+      padding-bottom: 0;
+    }
+  }
+
+  .time {
+    height: 100%;
+    margin: 0 10vw;
+    color: $timer-card-fg-color;
+    font-optical-sizing: auto;
+    font-weight: 600;
+  }
+
+  .time-entry-input {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 2;
+    width: 100%;
+    height: calc(100% - 55px);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    caret-color: transparent;
+    color: transparent;
+    background: transparent;
+    cursor: text;
+    -webkit-text-fill-color: transparent;
+    -webkit-user-select: text;
+    user-select: text;
+
+    @media (max-height: $layout-breakpoint-height-580px) {
+      height: 100%;
+    }
+  }
+
+  &.running .time-entry-input {
+    pointer-events: none;
+    cursor: pointer;
+  }
+
+  &.editing-time .time {
+    outline: 2px solid rgba(255, 255, 255, 0.2);
+    outline-offset: -12px;
+    border-radius: 8px;
+  }
+
+  &:not(.running) .time {
+    cursor: text;
+  }
+
+  &.black .card {
+    opacity: 0.25;
+  }
+
+  &.warning {
+    .card {
+      background: $timer-card-warning-bg-color;
+    }
+    .time {
+      color: $timer-card-warning-fg-color;
+    }
+  }
+
+  &.timeout {
+    .card {
+      background: $timer-card-timeout-bg-color;
+    }
+    .time {
+      color: $timer-card-timeout-fg-color;
+    }
+  }
+
+  .connecting {
+    display: none;
+    background: $timer-display-connecting-bg-color;
+    border-radius: 5px;
+    font-size: 16px;
+    color: $timer-display-connecting-fg-color;
+    padding: 5px 10px;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+
+    &.disconnected {
+      display: initial;
+    }
+  }
+}
+
+/******************************
+ * What to do on full screen?
+ */
+
+.fullscreen {
+  .timer-display {
+    cursor: none;
+    margin: 0;
+
+    .card {
+      padding-bottom: 0;
+    }
+
+    &.black .card {
+      opacity: 0;
+    }
+
+    .menu {
+      display: none;
+    }
+  }
+
+  .controls-display {
+    display: none;
+  }
+}
+
+/******************************
+ * Control buttons.
+ */
+
+.controls-display {
+  display: flex;
+  flex-direction: column;
+  margin: 2vh 1vh;
+}
+
+.controls {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin: 10px;
+
+  button {
+    display: inline-block;
+    padding: 0;
+    border-radius: 10px;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+
+    background: $controls-button-fill-color;
+    color: $controls-button-text-color;
+
+    &:active {
+      background: $controls-button-fill-hover-color;
+    }
+
+    @media (hover: hover) {
+      &:hover {
+        background: $controls-button-fill-hover-color;
+      }
+    }
+  }
+
+  button.disabled {
+    display: none;
+  }
+
+  button.on {
+    outline: 5px solid $controls-button-fill-color;
+    outline-offset: 5px;
+
+    &.on:active {
+      outline-color: $controls-button-fill-hover-color;
+    }
+
+    @media (hover: hover) {
+      &.on:hover {
+        outline-color: $controls-button-fill-hover-color;
+      }
+    }
+  }
+}
+
+/******************************
+* Main buttons: reset / play / black.
+*/
+
+.controls.main {
+  button {
+    margin: 0 5px;
+    flex-shrink: 0;
+    flex-grow: 0;
+
+    @media (min-width: $layout-breakpoint-width-500px) {
+      margin: 0 10px;
+    }
+
+    &.icon {
+      width: 95px;
+      height: 95px;
+      border-radius: 50%;
+
+      svg {
+        height: 45px;
+        vertical-align: top;
+      }
+    }
+
+    &.button-start,
+    &.button-pause {
+      width: 120px;
+      height: 120px;
+
+      svg {
+        height: 60px;
+      }
+    }
+
+    &.button-start svg {
+      padding-left: 10px;
+    }
+  }
+}
+
+/******************************
+ * QR code.
+ */
+
+.qr {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: $qr-bg-color;
+  fill: $qr-fg-color;
+  color: $qr-fg-color;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  &.visible {
+    display: flex;
+  }
+
+  & > svg {
+    flex-shrink: 1;
+    width: 100%;
+    height: 100%;
+    padding: 2vh 2vw 1vh 2vw;
+    max-width: 80%;
+    max-height: 60%;
+    shape-rendering: crispEdges;
+  }
+
+  p {
+    margin: 1vh 1vw;
+    font-size: 20px;
+  }
+
+  button {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+
+    svg {
+      width: 30px;
+      height: 30px;
+      fill: #aaa;
+    }
+  }
+
+  button:active svg {
+    fill: #000;
+  }
+
+  @media (hover: hover) {
+    button:hover svg {
+      fill: #000;
+    }
+  }
+}
+
+/******************************
+ * Controls on timer screen.
+ */
+
+.timer-display .menu {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 55px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  background: $timer-menu-bg-color;
+  cursor: default;
+
+  @media (max-height: $layout-breakpoint-height-580px) {
+    background: transparent;
+  }
+
+  .left,
+  .right {
+    display: flex;
+    flex-direction: row;
+    padding: 5px;
+
+    @media (min-width: $layout-breakpoint-width-500px) {
+      width: 110px;
+    }
+  }
+
+  .right {
+    justify-content: flex-end;
+  }
+
+  .status {
+    height: fit-content;
+    font-size: 16px;
+    color: $timer-menu-button-status-color;
+
+    @media (min-width: $layout-breakpoint-width-500px) {
+      font-size: 20px;
+    }
+
+    @media (max-height: $layout-breakpoint-height-580px) {
+      display: none;
+    }
+  }
+
+  button {
+    width: 26px;
+    height: 26px;
+    display: block;
+    background: $timer-menu-button-fill-color;
+    fill: $timer-menu-button-text-color;
+    padding: 5px;
+    border: none;
+    border-radius: 5px;
+    box-sizing: content-box;
+    margin: 5px;
+    cursor: pointer;
+
+    @media (hover: hover) {
+      &:hover {
+        background: $timer-menu-button-hover-fill-color;
+        fill: $timer-menu-button-hover-text-color;
+      }
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+
+.timer-display .qr.visible + .menu {
+  display: none;
+}
+
+/******************************
+ * Welcome splash screen.
+ */
+
+.splash-display {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+
+  p {
+    font-size: 30px;
+    text-align: center;
+    color: $body-fg-color;
+    padding: 0 10px;
+  }
+
+  input {
+    font-size: 30px;
+    margin: 5px;
+    padding: 10px;
+    text-align: center;
+  }
+
+  input[type="text"] {
+    background: $splash-input-text-bg-color;
+  }
+
+  @media (max-width: $layout-breakpoint-width-500px) {
+    p {
+      font-size: 20px;
+    }
+
+    p:last-child {
+      display: flex;
+      flex-direction: row;
+    }
+
+    input {
+      display: block;
+      font-size: 20px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      flex-shrink: 1;
+    }
+  }
+}

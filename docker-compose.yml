@@ -1,0 +1,8 @@
+services:
+  webtimer:
+    build: .
+    image: webtimer:local
+    container_name: webtimer
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
