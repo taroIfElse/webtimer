@@ -1,5 +1,5 @@
 # Build frontend
-FROM node:20-alpine AS frontend
+FROM node:26-alpine AS frontend
 WORKDIR /app
 COPY package.json package-lock.json ./
 COPY webpack.config.js tsconfig.json eslint.config.mjs ./
