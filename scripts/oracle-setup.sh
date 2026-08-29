@@ -14,9 +14,7 @@ sudo systemctl enable --now docker
 
 REPO_DIR="${HOME}/webtimer"
 if [ ! -d "$REPO_DIR/.git" ]; then
-  echo "Cloná tu repo en $REPO_DIR antes de continuar, o editá este script."
-  echo "Ejemplo: git clone https://github.com/TU_USUARIO/timer.git $REPO_DIR"
-  exit 1
+  git clone https://github.com/taroIfElse/webtimer.git "$REPO_DIR"
 fi
 
 cd "$REPO_DIR"
